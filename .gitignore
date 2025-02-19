@@ -1,0 +1,4 @@
+/config
+/.wwebjs_auth
+.env
+/node_modules
