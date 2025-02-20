@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes, useBcrypt) => {
             number: {
                 type: DataTypes.STRING,
                 allowNull: false,
+                unique: true,
                 validate: {
                     isNumeric: {
                         args: true,
