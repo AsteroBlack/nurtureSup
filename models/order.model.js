@@ -11,22 +11,18 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            date: {
-                type: DataTypes.DATEONLY,
+            jour: {
+                type: DataTypes.STRING,
                 allowNull: false
             },
             plat: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            entree: {
+            entreeDessert: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
-            dessert: {
-                type: DataTypes.STRING,
-                allowNull: true
-            }
         }, {
         timestamps: true
     })

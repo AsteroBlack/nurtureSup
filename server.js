@@ -4,6 +4,8 @@ const db = require('./config/db')
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/user.routes')
+const orderRoutes = require('./routes/order.routes')
+const menuRoutes = require('./routes/menu.routes')
 const {wwjs} = require('./services/whatsappService')
 
 wwjs.initialize()
@@ -14,6 +16,8 @@ app.use(bodyParser.json());
 
 //Middleware
 app.use('/user', userRoutes)
+app.use('/order', orderRoutes)
+app.use('/menu', menuRoutes)
 
 const PORT = process.env.PORT || 5000;
 

@@ -2,6 +2,7 @@ const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js')
 const qrcode = require('qrcode-terminal')
 const { analyzeMenuImage } = require('./anthropicService')
 const { DB } = require('../config/db')
+const getWeekNumber = require('../middleware/weekFunction')
 const Menu = DB.menu
 const User = DB.user
 
@@ -76,13 +77,6 @@ wwjs.on('message', async msg => {
     if (msg.hasMedia) {
         const media = await msg.downloadMedia()
         const imagePath = `./tmp/${msg.id.id}.jpg`
-
-        // Fonction pour obtenir le numero de la semaine actuelle
-        const getWeekNumber = (date) => {
-            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-        };
 
         const today = new Date();
         const weekNumber = getWeekNumber(today);

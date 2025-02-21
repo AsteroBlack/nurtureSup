@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
+const { DB } = require('../config/db')
+const Users = DB.user
 
 const authMiddleware = (req, res, next) => {
     const token = req.header('Authorization');
@@ -14,4 +16,24 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-module.exports = authMiddleware;
+const authenticateAdmin = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization').replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).json({ message: 'Accès refusé, token manquant.' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await Users.findByPk(decoded.id);
+
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({ message: 'Accès refusé, administrateur requis.' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Token invalide ou expiré.' });
+    }
+};
+module.exports = {authMiddleware, authenticateAdmin};
