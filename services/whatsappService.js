@@ -54,42 +54,58 @@ wwjs.on('message', async msg => {
         const media = await msg.downloadMedia()
         const imagePath = `./tmp/${msg.id.id}.jpg`
 
+        // Fonction pour obtenir le numero de la semaine actuelle
+        const getWeekNumber = (date) => {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        };
+
+        const today = new Date();
+        const weekNumber = getWeekNumber(today);
+        const week = `Semaine-${weekNumber + 1}-${new Date().getFullYear()}`
+
+        const verifWeek = await Menu.findOne({ where: { week: week } })
+        if (verifWeek)  {
+            wwjs.sendMessage(msg.from, `☑️ Le menu de la semaine ${weekNumber + 1} a deja ete ajoute`)
+            return
+        }
+             
         require("fs").writeFileSync(imagePath, media.data, { encoding: "base64" })
-        // const imageUrl = `data:${media.mimetype}base64,${media.data}` // Convertir en Base64
 
         wwjs.sendMessage(msg.from, "🔍 Analyse du menu en cours...")
 
         const menu = await analyzeMenuImage(imagePath)
 
         //Convertir en JSON le menu
-        let menuData 
+        let menuData
         try {
             menuData = JSON.parse(menu)
         } catch (error) {
-            menuData = menu 
+            menuData = menu
         }
 
         console.log(menuData)
-        
+
 
         if (!menuData) {
             wwjs.sendMessage(msg.from, "❌ Impossible d'extraire un menu valide.")
             return
         }
 
-        // Vérifier que le JSON contient bien un menu compl
+        // Vérifier que le JSON contient bien un menu complet
         if (!menuData["lundi"] || !menuData["mardi"]) {
             wwjs.sendMessage(msg.from, menuData)
             return
-        } 
+        }
 
         // Sauvegarde en base avec identification de la semaine
         await Menu.create({
-            week: `Semaine-${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
+            week: week,
             menuData: menuData
         })
 
-        wwjs.sendMessage(msg.from, "✅ Menu enregistré avec succès en base de données !")      
+        wwjs.sendMessage(msg.from, "✅ Menu enregistré avec succès en base de données !")
     }
 })
 
