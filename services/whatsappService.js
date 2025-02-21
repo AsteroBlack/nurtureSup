@@ -3,6 +3,7 @@ const qrcode = require('qrcode-terminal')
 const { analyzeMenuImage } = require('./anthropicService')
 const { DB } = require('../config/db')
 const Menu = DB.menu
+const User = DB.user
 
 const wwjs = new Client({
     authStrategy: new LocalAuth(),
@@ -47,6 +48,28 @@ wwjs.on('qr', qr => {
 //     }
 // })
 
+
+//Envoi de message
+const sendWaMsg = async (number, sendMsg) => {
+    const numbers = [`225${number}@c.us`, `225${number.slice(2)}@c.us`]
+
+    console.log(numbers)
+    const url = 'https://upload.wikimedia.org/wikipedia/commons/7/78/Image.jpg'
+    const media = await MessageMedia.fromUrl(url)
+    media.mimetype = "image/jpg"
+    media.filename = "Image.jpg"
+
+    numbers.forEach(async (number) => {
+        try {
+            wwjs.sendMessage(number, media, { caption: `${sendMsg}` })
+            console.log('messageMediaSend')
+        }
+        catch (err) {
+            console.log('An error has occurred', err)
+        }
+    })
+
+}
 
 //Analyse et ajout du menu dans la db
 wwjs.on('message', async msg => {
@@ -106,30 +129,14 @@ wwjs.on('message', async msg => {
         })
 
         wwjs.sendMessage(msg.from, "✅ Menu enregistré avec succès en base de données !")
+
+        const users = await User.findAll()
+        users.forEach(user => {
+            sendWaMsg(user.number, `🤗 Salut ${user.name} \n Le Menu de ma semaine est disponible, Si vous souhaitez commander cliquez sur le lien ci-dessous et passez vos commande avant 12h \n https://lien.com`)
+        })
     }
 })
 
-//Envoi de message
-const sendWaMsg = async (number, sendMsg) => {
-    const numbers = [`225${number}@c.us`, `225${number.slice(2)}@c.us`]
-
-    console.log(numbers)
-    const url = 'https://upload.wikimedia.org/wikipedia/commons/7/78/Image.jpg'
-    const media = await MessageMedia.fromUrl(url)
-    media.mimetype = "image/jpg"
-    media.filename = "Image.jpg"
-
-    numbers.forEach(async (number) => {
-        try {
-            wwjs.sendMessage(number, media, { caption: `${sendMsg}` })
-            console.log('messageMediaSend')
-        }
-        catch (err) {
-            console.log('An error has occurred', err)
-        }
-    })
-
-}
 
 
 
