@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes, useBcrypt) => {
+module.exports = (sequelize, DataTypes) => {
 
     const MenuModel = sequelize.define(
         'Menu',

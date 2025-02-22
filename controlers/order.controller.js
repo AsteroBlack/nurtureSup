@@ -13,11 +13,15 @@ const setOrder = async (req, res) => {
 
         const today = new Date()
         const currentWeek = getWeekNumber(today)
+        console.log(currentWeek);
+        
         const week = `Semaine-${currentWeek + 1}-${new Date().getFullYear()}`
-
+        
         const menu = await Menu.findOne({ where: { week: week } })
-        if (!menu) return res.status(400).json({ message: 'Aucun menu disponible pour cette semaine' })
+        const order = await Order.findOne({where:{menuId: menu.id, jour}}) 
 
+        if (!menu) return res.status(400).json({ message: 'Aucun menu disponible pour cette semaine' })
+        if (order) return res.status(400).json({message: 'Vous avez deja commander ce jour'})
         const parametres = await Parameters.findOne({ where: { key: 'max_plats_jour' } })
         const maxPlats = parametres ? parametres.valeur : 3
 
@@ -42,7 +46,7 @@ const getOrderByUser = async (req, res) => {
 
 const getAllOrder = async (req, res) => {
     try {
-        const allOrders = await Order.findAll({ include: [{ model: DB.user, attributes: ['name', 'phone'] }] })
+        const allOrders = await Order.findAll({ include: [{ model: DB.user, attributes: ['name', 'number'] }] })
         res.json(allOrders)
     } catch (error) {
         res.status(500).json({ message: 'Erreur serveur', error })
